@@ -1,0 +1,25 @@
+name: Upload container
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Get Git tag name
+        id: getTagName
+        run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
+      - name: Publish to Registry
+        run: |
+          docker login docker.pkg.github.com -u $username -p $password
+          docker build -t $imageName .
+          docker push $imageName
+        env:
+          imageName: docker.pkg.github.com/gabibbo97/x509boi/x509boi:${{ steps.getTagName.outputs.TAG }}
+          username: gabibbo97
+          password: ${{ secrets.GITHUB_TOKEN }}
